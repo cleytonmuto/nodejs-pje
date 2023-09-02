@@ -1,7 +1,7 @@
 'use strict';
 
 const db = require('../models');
-const processo = db.processo;
+const Processo = db.processo;
 const Op = db.Sequelize.Op;
 const { json2xml } = require('xml-js');
 
@@ -18,6 +18,7 @@ const create = (req, res) => {
 
   // Propriedades do objeto processo
   const processo = {
+    id: req.body.id,
     cnj: req.body.cnj,
     nome: req.body.nome,
     documento: req.body.documento,
@@ -27,7 +28,7 @@ const create = (req, res) => {
   };
 
   // Salva o processo na base
-  processo.create(processo)
+  Processo.create(processo)
     .then((data) => {
       res.status(200).send({
         data: data,
@@ -48,14 +49,15 @@ const findAll = (req, res) => {
   const limit = parseInt(req.query.limit) || 20
   const page = parseInt(req.query.page) || 1
   const offset = (page - 1) * limit;
-  processo.findAll({
+  Processo.findAll({
     limit: limit,
     offset: offset,
     order: [
       ['id', 'ASC']
     ]
   }).then((data) => {
-    res.status(200).send(json2xml(data, {compact: true, spaces: 4}));
+    console.log(data);
+    res.status(200).send(data);
   })
     .catch((err) => {
       res.status(500).send({
@@ -66,7 +68,7 @@ const findAll = (req, res) => {
 
 // Conta linhas
 const countRows = (req, res) => {
-  processo.count()
+  Processo.count()
     .then((data) => {
       let countRows = {
         numLinhas: data
@@ -85,7 +87,7 @@ const findShort = (req, res) => {
   const limit = parseInt(req.query.limit) || 20
   const page = parseInt(req.query.page) || 1
   const offset = (page - 1) * limit;
-  processo.findAll({
+  Processo.findAll({
     attributes: ['id', 'cnj', 'nome', 'documento', 'email', 'endereco', 'pendente'],
     limit: limit,
     offset: offset,
@@ -108,7 +110,7 @@ const findReducedAll = (req, res) => {
   const limit = parseInt(req.query.limit) || 20
   const page = parseInt(req.query.page) || 1
   const offset = (page - 1) * limit;
-  processo.findAll({
+  Processo.findAll({
     attributes: ['id', 'cnj', 'nome', 'documento', 'email', 'endereco', 'pendente'],
     limit: limit,
     offset: offset
@@ -125,7 +127,7 @@ const findReducedAll = (req, res) => {
 // Consulta um unico processo na base
 const findOne = (req, res) => {
   const id = req.params.id;
-  processo.findByPk(id)
+  Processo.findByPk(id)
     .then((data) => {
       res.status(200).send(data);
     })
@@ -153,7 +155,7 @@ const findSome = (req, res) => {
     ]
   } : null;
 
-  processo.findAndCountAll({
+  Processo.findAndCountAll({
     attributes: ['id', 'cnj', 'nome', 'documento', 'email', 'endereco', 'pendente'],
     limit, offset, where: condition
   })
@@ -175,7 +177,7 @@ const pageNotFound = (req, res) => {
 // Atualiza um processo de acordo com o id da requisicao
 const update = (req, res) => {
   const id = req.body.id;
-  processo.update(req.body, {
+  Processo.update(req.body, {
     where: { id: id },
   })
     .then((rowsUpdated) => {
@@ -200,7 +202,7 @@ const update = (req, res) => {
 // Exclui um processo de acordo com o id da requisicao
 const exclude = (req, res) => {
   const id = req.params.id;
-  processo.destroy({
+  Processo.destroy({
     where: { id: id },
   })
     .then(() => {
